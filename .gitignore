@@ -1,2 +1,9 @@
 ﻿logs
 appsettings.*.json
+.vs/HGT.EAM.Client/config/applicationhost.config
+.vs/HGT.EAM.Client/DesignTimeBuild
+.vs/HGT.EAM.Client/FileContentIndex
+.vs/HGT.EAM.Client/v18
+.vs/ProjectEvaluation
+bin
+obj

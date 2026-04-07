@@ -76,15 +76,43 @@ internal sealed class Program
                 if (operationOption == 0) continue;
                 if (operationOption < 1) continue;
 
-                // Pantalla 3: Parámetros
+                // Pantalla 3: Periodo
                 string operationName = operationOption == 1 ? "GRILLA PROVISIONES" : "AUDITORÍA OC";
-                DrawHeader($"PARÁMETROS - {selectedOrg} - {operationName}");
-                
-                int month = ReadInteger("  Mes (1-12)         : ", 1, 12);
-                if (month < 0) continue;
+                DrawHeader($"PERIODO - {selectedOrg} - {operationName}");
+                Console.WriteLine("  Seleccione el periodo de sincronización:\n");
+                WriteOption("1", "Día anterior");
+                WriteOption("2", "Mes anterior");
+                WriteOption("3", "Mes actual");
+                WriteOption("4", "Por mes y año");
+                WriteOption("0", "Volver atrás");
+                Console.WriteLine();
 
-                int year = ReadInteger("  Año (ej. 2025)     : ", 2000, 2100);
-                if (year < 0) continue;
+                int periodOption = ReadInteger("  Opción: ", 0, 4);
+                if (periodOption == 0) continue;
+                if (periodOption < 1) continue;
+
+                string typeFilter = periodOption switch
+                {
+                    1 => "1",
+                    2 => "2",
+                    3 => "3",
+                    4 => "5",
+                    _ => "5"
+                };
+
+                int month = DateTime.UtcNow.Month;
+                int year = DateTime.UtcNow.Year;
+
+                if (periodOption == 4)
+                {
+                    // Pantalla 4: Parámetros Mes/Año
+                    DrawHeader($"PARÁMETROS - {selectedOrg} - {operationName}");
+                    month = ReadInteger("  Mes (1-12)         : ", 1, 12);
+                    if (month < 0) continue;
+
+                    year = ReadInteger("  Año (ej. 2025)     : ", 2000, 2100);
+                    if (year < 0) continue;
+                }
 
                 int pageSize = ReadInteger("  Tamaño de página   : ", 1, 5000);
                 if (pageSize < 0) continue;
@@ -100,13 +128,14 @@ internal sealed class Program
                     var query = new ProvisionQuery
                     {
                         Credentials = selectedCredentials,
+                        TypeFilter = typeFilter,
                         Month = month,
                         Year  = year,
                         Page  = 1,
                         PageSize = pageSize
                     };
 
-                    logger.LogInformation("[{Org}] Iniciando grilla de provisiones para {Month}/{Year}", selectedOrg, month, year);
+                    logger.LogInformation("[{Org}] Iniciando grilla de provisiones ({Filter})", selectedOrg, typeFilter);
                     var (totalRecords, totalPages, inserted) = await provisionSvc.FetchAndPersistAllAsync(query);
 
                     Console.WriteLine();
@@ -119,19 +148,21 @@ internal sealed class Program
                     var query = new PurchaseOrderAuditQuery
                     {
                         Credentials = selectedCredentials,
+                        TypeFilter = typeFilter,
                         Month = month, 
                         Year = year,
                         Page = 1,
                         PageSize = pageSize
                     };
 
-                    logger.LogInformation("[{Org}] Iniciando auditoría de órdenes de compra para {Month}/{Year}", selectedOrg, month, year);
+                    logger.LogInformation("[{Org}] Iniciando auditoría de órdenes de compra ({Filter})", selectedOrg, typeFilter);
                     var (totalRecords, totalPages, inserted) = await auditSvc.FetchAndPersistAllAsync(query);
 
                     Console.WriteLine();
                     ShowSuccess($"Auditoría completada [{selectedOrg}] — Registros: {totalRecords}, Páginas: {totalPages}, Insertados: {inserted}");
                     logger.LogInformation("[{Org}] Auditoría completada: TotalRecords={R}, TotalPages={P}, Inserted={I}", selectedOrg, totalRecords, totalPages, inserted);
                 }
+
 
                 Console.WriteLine();
                 Console.ForegroundColor = ConsoleColor.DarkGray;

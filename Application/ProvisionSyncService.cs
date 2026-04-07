@@ -33,7 +33,7 @@ public sealed class ProvisionSyncService : BaseSyncService<Provision, ProvisionQ
         var json = await _client.GetStringAsync(ApiEndpoints.Provisions, query, q.Credentials, ct).ConfigureAwait(false);
         var result = ProvisionMapper.FromApiEnvelope(json, culture);
 
-        _logger.LogInformation("Json: \n {json}", json);
+        //_logger.LogInformation("Json: \n {json}", json);
 
         _logger.LogInformation("Fetch completado: TotalRecords={TotalRecords}, TotalPages={TotalPages}, Items={Items}",
             result.TotalRecords, result.TotalPages, result.Items.Count);

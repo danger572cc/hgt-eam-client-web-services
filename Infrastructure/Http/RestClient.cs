@@ -25,7 +25,12 @@ public sealed class RestClient
 
     private async Task<string> SendAsync(HttpMethod method, string relativeOrAbsoluteUrl, Configuration.ApiCredentials? credentials, CancellationToken ct)
     {
-        _logger.LogInformation("Enviando solicitud HTTP {Method} a {Url}", method, relativeOrAbsoluteUrl);
+        var baseAddress = _http.BaseAddress?.ToString().TrimEnd('/') ?? string.Empty;
+        var fullUrl = relativeOrAbsoluteUrl.StartsWith("http") 
+            ? relativeOrAbsoluteUrl 
+            : $"{baseAddress}/{relativeOrAbsoluteUrl.TrimStart('/')}";
+
+        _logger.LogInformation("Enviando solicitud HTTP {Method} a {Url}", method, fullUrl);
         try
         {
             using var req = new HttpRequestMessage(method, relativeOrAbsoluteUrl);
@@ -44,16 +49,16 @@ public sealed class RestClient
             var body = await resp.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
             if (!resp.IsSuccessStatusCode)
             {
-                _logger.LogError("Error HTTP {StatusCode} al solicitar {Url}. Body: {Body}", resp.StatusCode, relativeOrAbsoluteUrl, body);
+                _logger.LogError("Error HTTP {StatusCode} al solicitar {Url}. Body: {Body}", resp.StatusCode, fullUrl, body);
                 throw new HttpRequestException($"HTTP {(int)resp.StatusCode} {resp.ReasonPhrase}. Body: {body}");
             }
 
-            _logger.LogInformation("Respuesta HTTP exitosa desde {Url} ({ContentLength} bytes)", relativeOrAbsoluteUrl, body.Length);
+            _logger.LogInformation("Respuesta HTTP exitosa desde {Url} ({ContentLength} bytes)", fullUrl, body.Length);
             return body;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Excepción al realizar solicitud HTTP {Method} a {Url}", method, relativeOrAbsoluteUrl);
+            _logger.LogError(ex, "Excepción al realizar solicitud HTTP {Method} a {Url}", method, fullUrl);
             throw;
         }
     }

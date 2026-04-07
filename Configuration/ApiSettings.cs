@@ -25,14 +25,20 @@ public class BaseQuery
 
     public Dictionary<string, string?> ToQueryDictionary()
     {
-        return new Dictionary<string, string?>
+        var dict = new Dictionary<string, string?>
         {
             ["typeFilter"] = TypeFilter,
-            ["month"] = Month.ToString(),
-            ["year"] = Year.ToString(),
             ["page"] = Page.ToString(),
-            ["pagSize"] = PageSize.ToString() // Watch out for 'pagSize' because that is how the endpoint expects it
+            ["pagSize"] = PageSize.ToString()
         };
+
+        if (TypeFilter == "5")
+        {
+            dict["month"] = Month.ToString();
+            dict["year"] = Year.ToString();
+        }
+
+        return dict;
     }
 }
 
@@ -48,8 +54,17 @@ public static class ApiEndpoints
     public static string BuildUrl(this BaseQuery query, string baseUrl, string endpoint)
     {
         var root = baseUrl.TrimEnd('/');
-        var typeFilter = Uri.EscapeDataString(query.TypeFilter ?? string.Empty);
-        return $"{root}/{endpoint}?typeFilter={typeFilter}&month={query.Month}&year={query.Year}&page={query.Page}&pagSize={query.PageSize}";
+        var typeFilter = Uri.EscapeDataString(query.TypeFilter ?? "5");
+        
+        var url = $"{root}/{endpoint}?typeFilter={typeFilter}&page={query.Page}&pagSize={query.PageSize}";
+        
+        if (query.TypeFilter == "5")
+        {
+            url += $"&month={query.Month}&year={query.Year}";
+        }
+        
+        return url;
     }
 }
+
 
