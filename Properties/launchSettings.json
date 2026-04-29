@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "HGT.EAM.Client": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

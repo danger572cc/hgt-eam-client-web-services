@@ -7,3 +7,5 @@ appsettings.*.json
 .vs/ProjectEvaluation
 bin
 obj
+appsettings.Stage.json
+appsettings.Development.json
