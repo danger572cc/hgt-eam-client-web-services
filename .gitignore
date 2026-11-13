@@ -9,3 +9,5 @@ bin
 obj
 appsettings.Stage.json
 appsettings.Development.json
+.agents/
+CLAUDE.md
